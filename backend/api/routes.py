@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from core.engine import generate_quote
-from core.visualizer import create_styled_post
+from backend.core.engine import generate_quote
+from backend.core.visualizer import create_styled_post
 
 router = APIRouter()
 

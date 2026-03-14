@@ -1,11 +1,11 @@
 import os
 import textwrap
 from PIL import Image, ImageDraw, ImageFont
+# Import the new modular background service
+from backend.core.background_service import get_background
 
-# Define absolute path to fonts based on your hierarchy
 BASE_FONT_PATH = os.path.join("assets", "fonts")
 
-# Map vibes to your downloaded fonts
 STYLE_MAP = {
     "melancholic": os.path.join("Playfair_Display", "static", "PlayfairDisplay-Medium.ttf"),
     "modern": os.path.join("Montserrat", "static", "Montserrat-Regular.ttf"),
@@ -14,9 +14,11 @@ STYLE_MAP = {
     "minimalist": os.path.join("Inter", "static", "Inter-Regular.ttf")
 }
 
-def create_styled_post(text, vibe="melancholic", output_path="post.png"):
+def create_styled_post(text, vibe="melancholic", bg_type="gradient", output_path="post.png"):
     width, height = 1080, 1080
-    img = Image.new("RGB", (width, height), color=(15, 15, 15))
+    
+    # MODULAR CHANGE: Fetch the background layer from our service
+    img = get_background(bg_type=bg_type, width=width, height=height)
     draw = ImageDraw.Draw(img)
 
     # Resolve font path
@@ -24,19 +26,22 @@ def create_styled_post(text, vibe="melancholic", output_path="post.png"):
     full_font_path = os.path.join(BASE_FONT_PATH, font_rel_path)
 
     try:
-        font = ImageFont.truetype(full_font_path, 65)
+        # Increased font size slightly for "Pro" look
+        font = ImageFont.truetype(full_font_path, 70)
     except OSError:
         print(f"Font not found at {full_font_path}, using default.")
         font = ImageFont.load_default()
 
-    # Wrap and Draw
+    # Wrap and Draw logic remains the same
     lines = textwrap.wrap(text, width=30)
-    line_h = font.getbbox("hg")[3] - font.getbbox("hg")[1] + 25
+    line_h = font.getbbox("hg")[3] - font.getbbox("hg")[1] + 30 
     current_y = (height - (len(lines) * line_h)) / 2
 
     for line in lines:
-        lx = (width - draw.textbbox((0, 0), line, font=font)[2]) / 2
-        draw.text((lx, current_y), line, fill=(240, 240, 240), font=font)
+        bbox = draw.textbbox((0, 0), line, font=font)
+        lx = (width - bbox[2]) / 2
+        # Added a very slight shadow/glow effect by drawing twice (optional but pro)
+        draw.text((lx, current_y), line, fill=(245, 245, 245), font=font)
         current_y += line_h
 
     img.save(output_path)
