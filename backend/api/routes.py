@@ -9,6 +9,7 @@ router = APIRouter()
 class PostRequest(BaseModel):
     vibe: str = "melancholic"
     text: str = None  # Optional: allows manual override
+    bg_type: str = "gradient" # Added this to capture the background choice
 
 @router.post("/draft")
 async def draft_quote(request: PostRequest):
@@ -25,7 +26,12 @@ async def render_post(request: PostRequest):
         raise HTTPException(status_code=400, detail="Text is required for rendering.")
     
     try:
-        path = create_styled_post(request.text, vibe=request.vibe)
+        # Pass bg_type explicitly to the visualizer
+        path = create_styled_post(
+            request.text, 
+            vibe=request.vibe, 
+            bg_type=request.bg_type
+        )
         return {"message": "Post rendered successfully", "path": path}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
