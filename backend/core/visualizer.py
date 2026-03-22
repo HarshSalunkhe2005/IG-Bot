@@ -12,7 +12,7 @@ HISTORY_FILE = os.path.join("outputs", "history.json")
 os.makedirs(POSTS_DIR, exist_ok=True)
 
 DEFAULT_FONT = "Playfair Display"
-PADDING = 120  # Safe zone from edges
+PADDING = 120
 
 def save_to_history(quote, file_path):
     history = []
@@ -33,7 +33,6 @@ def save_to_history(quote, file_path):
         json.dump(history, f, indent=4)
 
 def fetch_google_font(font_name: str, size: int = 68) -> ImageFont.FreeTypeFont:
-    """Fetches a font from Google Fonts and returns a PIL ImageFont."""
     try:
         css_url = f"https://fonts.googleapis.com/css2?family={font_name.replace(' ', '+')}:wght@400;700"
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -69,25 +68,27 @@ def create_styled_post(text, vibe="melancholic", ai_bg_path=None, font_name=None
     width, height = 1080, 1080
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_path = os.path.join(POSTS_DIR, f"post_{timestamp}.png")
+    clean_bg_path = os.path.join(POSTS_DIR, f"post_{timestamp}_bg.png")
 
+    # Build background
     if ai_bg_path and os.path.exists(ai_bg_path):
         img = process_ai_background(ai_bg_path)
     else:
         img = Image.new("RGB", (width, height), (15, 15, 15))
 
-    draw = ImageDraw.Draw(img)
+    # Save clean background for reel (no text)
+    img.save(clean_bg_path)
+    print(f"--- [VISUALIZER] Clean BG saved: {clean_bg_path} ---")
 
+    # Now render text on top for the static post
+    draw = ImageDraw.Draw(img)
     selected_font = font_name if font_name else DEFAULT_FONT
     print(f"--- [VISUALIZER] Using font: {selected_font} ---")
 
-    # Available text width respecting padding
     max_text_width = width - (PADDING * 2)
-
-    # Auto-fit font size
     font_size = 72
     font = fetch_google_font(selected_font, font_size)
 
-    # Shrink font until text fits within padding bounds
     while font_size > 32:
         font = fetch_google_font(selected_font, font_size)
         lines = textwrap.wrap(text, width=26)
@@ -112,7 +113,8 @@ def create_styled_post(text, vibe="melancholic", ai_bg_path=None, font_name=None
     img.save(output_path)
     save_to_history(text, output_path)
 
+    # Cleanup temp AI background
     if ai_bg_path and os.path.exists(ai_bg_path):
         os.remove(ai_bg_path)
 
-    return output_path
+    return output_path, clean_bg_path
