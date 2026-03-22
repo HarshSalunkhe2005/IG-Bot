@@ -1,41 +1,47 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from backend.models.schemas import PostRequest
 from backend.core.engine import generate_quote
 from backend.core.visualizer import create_styled_post
-from backend.core.image_service import generate_background_image # New import
+from backend.core.image_service import generate_background_image
 
 router = APIRouter()
 
-class PostRequest(BaseModel):
-    vibe: str = "melancholic"
-    text: str = None 
-    bg_type: str = "ai_generated" # Defaulting to the new pro feature
-
 @router.post("/draft")
 async def draft_quote(request: PostRequest):
-    quote = await generate_quote(request.vibe)
+    result = await generate_quote(request.vibe)
+    if isinstance(result, tuple):
+        quote, font = result
+    else:
+        raise HTTPException(status_code=500, detail=result)
+
     if "Error" in quote:
         raise HTTPException(status_code=500, detail=quote)
-    return {"quote": quote, "vibe": request.vibe}
+
+    return {"quote": quote, "font": font, "vibe": request.vibe}
 
 @router.post("/render")
 async def render_post(request: PostRequest):
     if not request.text:
         raise HTTPException(status_code=400, detail="Text is required for rendering.")
-    
+
     try:
-        # 1. Generate the AI Background based on the text and vibe
         ai_bg_path = None
         if request.bg_type == "ai_generated":
-            ai_bg_path = generate_background_image(request.text, vibe=request.vibe)
-        
-        # 2. Render the post using the new background (or fallback)
+            ai_bg_path = await generate_background_image(
+                quote_text=request.text,
+                vibe=request.vibe
+            )
+            if not ai_bg_path:
+                print("--- [ROUTE] AI Background generation failed. Falling back. ---")
+
         path = create_styled_post(
-            request.text, 
-            vibe=request.vibe, 
-            ai_bg_path=ai_bg_path
+            text=request.text,
+            vibe=request.vibe,
+            ai_bg_path=ai_bg_path,
+            font_name=request.font
         )
-        
+
         return {"message": "Post rendered successfully", "path": path}
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
+        raise HTTPException(status_code=500, detail=str(e))
