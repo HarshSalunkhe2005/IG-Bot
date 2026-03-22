@@ -2,6 +2,6 @@
 file_hierarchy.txt
 run_bot.py
 outputs/
-assets/backgrounds/*.jpg
-assets/backgrounds/*.png
-assets/backgrounds/*.jpeg
+__pycache__/
+*.pyc
+*.pyo
