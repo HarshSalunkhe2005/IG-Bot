@@ -5,3 +5,7 @@ outputs/
 __pycache__/
 *.pyc
 *.pyo
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/src/assets/hero.png

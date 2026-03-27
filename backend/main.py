@@ -1,10 +1,20 @@
 import uvicorn
 from fastapi import FastAPI
-# Note the change in import style because we are already inside 'backend'
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from backend.api.routes import router as api_router
 
 app = FastAPI(title="IG-Bot API")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.mount("/outputs", StaticFiles(directory="outputs"), name="outputs")
 app.include_router(api_router, prefix="/api")
 
 @app.get("/")
@@ -12,5 +22,4 @@ def read_root():
     return {"status": "IG-Bot Backend is Online"}
 
 if __name__ == "__main__":
-    # Change "main:app" to "backend.main:app"
     uvicorn.run("backend.main:app", host="127.0.0.1", port=8000, reload=True)
