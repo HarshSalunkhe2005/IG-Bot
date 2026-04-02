@@ -5,7 +5,7 @@ import io
 import re
 import textwrap
 import os
-from moviepy.editor import VideoClip, AudioFileClip, CompositeAudioClip
+from moviepy.editor import VideoClip
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -174,14 +174,10 @@ def make_ken_burns_reel(image_path: str, quote: str, font_name: str = None, anim
     clip = VideoClip(make_frame, duration=duration)
     clip = clip.set_fps(fps)
 
-    # Add silent audio track (will upgrade with bg music later)
-    silent_audio = CompositeAudioClip([])
-    clip = clip.set_audio(silent_audio)
-
     output_filename = os.path.splitext(os.path.basename(image_path))[0] + "_reel.mp4"
     output_path = os.path.join(REELS_DIR, output_filename)
 
     logger.info(f"[KEN BURNS] Creating reel with duration {duration}s...")
-    clip.write_videofile(output_path, fps=fps, codec="libx264", audio_codec="aac", verbose=False, logger=None)
+    clip.write_videofile(output_path, fps=fps, codec="libx264", verbose=False, logger=None)
     logger.info(f"[KEN BURNS] Reel saved: {output_path}")
     return output_path
