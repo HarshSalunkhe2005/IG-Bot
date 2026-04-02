@@ -5,7 +5,11 @@ import io
 import re
 import textwrap
 import os
-from moviepy.editor import VideoClip
+from moviepy.editor import VideoClip, AudioFileClip, CompositeAudioClip
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 REELS_DIR = os.path.join("outputs", "reels")
 os.makedirs(REELS_DIR, exist_ok=True)
@@ -24,7 +28,7 @@ def fetch_google_font_pil(font_name: str, size: int = 60) -> ImageFont.FreeTypeF
             font_resp = client.get(urls[0], headers=headers)
             return ImageFont.truetype(io.BytesIO(font_resp.content), size)
     except Exception as e:
-        print(f"--- [KEN BURNS] Font fetch failed ({e}). Using default. ---")
+        logger.warning(f"[KEN BURNS] Font fetch failed ({e}). Using default.")
         return ImageFont.load_default()
 
 def make_ken_burns_reel(image_path: str, quote: str, font_name: str = None, animation: str = "line_fade", fps: int = 30) -> str:
@@ -38,9 +42,6 @@ def make_ken_burns_reel(image_path: str, quote: str, font_name: str = None, anim
 
     lines = textwrap.wrap(quote, width=26)
     total_lines = len(lines)
-
-    # Dynamic duration: 2.5s per line minimum, 6s intro+outro buffer
-    duration = max(12, total_lines * 2.5 + 6)
 
     # Dynamic duration: 2.5s per line minimum, 6s intro+outro buffer
     duration = max(12, total_lines * 2.5 + 6)
@@ -92,7 +93,6 @@ def make_ken_burns_reel(image_path: str, quote: str, font_name: str = None, anim
         if animation == "word_fade":
             all_words = quote.split()
             total_words = len(all_words)
-            # Reconstruct lines with word-level alpha
             word_idx = 0
             for i, line in enumerate(lines):
                 words = line.split()
@@ -174,9 +174,14 @@ def make_ken_burns_reel(image_path: str, quote: str, font_name: str = None, anim
     clip = VideoClip(make_frame, duration=duration)
     clip = clip.set_fps(fps)
 
+    # Add silent audio track (will upgrade with bg music later)
+    silent_audio = CompositeAudioClip([])
+    clip = clip.set_audio(silent_audio)
+
     output_filename = os.path.splitext(os.path.basename(image_path))[0] + "_reel.mp4"
     output_path = os.path.join(REELS_DIR, output_filename)
 
-    clip.write_videofile(output_path, fps=fps, codec="libx264", audio=False, logger=None)
-    print(f"--- [KEN BURNS] Reel saved: {output_path} ---")
+    logger.info(f"[KEN BURNS] Creating reel with duration {duration}s...")
+    clip.write_videofile(output_path, fps=fps, codec="libx264", audio_codec="aac", verbose=False, logger=None)
+    logger.info(f"[KEN BURNS] Reel saved: {output_path}")
     return output_path
