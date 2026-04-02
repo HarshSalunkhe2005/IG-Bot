@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException
-from backend.models.schemas import PostRequest, ReelRequest
+from backend.models.schemas import PostRequest, ReelRequest, PostToInstagramRequest, RetryFailedPostRequest
 from backend.core.engine import generate_quote
 from backend.core.visualizer import create_styled_post
 from backend.core.image_service import generate_background_image
 from backend.core.reel.reel_builder import build_reel
+from backend.core.ig_service import post_reel_to_instagram, load_failed_posts, remove_failed_post, increment_retry_count
 
 router = APIRouter()
 
@@ -51,8 +52,7 @@ async def render_reel(request: ReelRequest):
             image_path=request.image_path,
             quote=request.quote,
             vibe=request.vibe,
-            font_name=request.font,
-            animation=request.animation
+            font_name=request.font
         )
         return {
             "message": "Reel built successfully",
@@ -62,3 +62,53 @@ async def render_reel(request: ReelRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/post-to-instagram")
+async def post_to_instagram(request: PostToInstagramRequest):
+    """Post reel to Instagram"""
+    result = await post_reel_to_instagram(request.reel_path, request.caption)
+    
+    if not result.get("success"):
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": result.get("error"),
+                "suggestion": result.get("suggestion")
+            }
+        )
+    
+    return {
+        "success": True,
+        "post_url": result.get("post_url"),
+        "post_id": result.get("post_id"),
+        "message": result.get("message")
+    }
+
+@router.post("/retry-failed-post")
+async def retry_failed_post(request: RetryFailedPostRequest):
+    """Retry posting a failed reel"""
+    increment_retry_count(request.reel_path)
+    result = await post_reel_to_instagram(request.reel_path, request.caption)
+    
+    if result.get("success"):
+        remove_failed_post(request.reel_path)
+        return {
+            "success": True,
+            "post_url": result.get("post_url"),
+            "post_id": result.get("post_id"),
+            "message": "Reel posted successfully on retry!"
+        }
+    else:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": result.get("error"),
+                "suggestion": result.get("suggestion")
+            }
+        )
+
+@router.get("/failed-posts")
+async def get_failed_posts():
+    """Get list of failed posts for user"""
+    failed_posts = load_failed_posts()
+    return {"failed_posts": failed_posts, "count": len(failed_posts)}
