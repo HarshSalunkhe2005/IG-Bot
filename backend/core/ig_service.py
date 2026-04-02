@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 # IG credentials from .env
 IG_ACCESS_TOKEN = os.getenv("IG_ACCESS_TOKEN")
 IG_BUSINESS_ACCOUNT_ID = os.getenv("IG_BUSINESS_ACCOUNT_ID")
+print(f"[IG SERVICE] DEBUG - Account ID: {IG_BUSINESS_ACCOUNT_ID}")
+print(f"[IG SERVICE] DEBUG - Token exists: {bool(IG_ACCESS_TOKEN)}")
 GRAPH_API_VERSION = "v18.0"
 
 FAILED_POSTS_FILE = os.path.join("outputs", "failed_posts.json")
@@ -87,7 +89,8 @@ async def post_reel_to_instagram(reel_path: str, caption: str) -> dict:
     """
     try:
         # Construct video URL
-        video_url = f"http://localhost:8000/outputs/{reel_path.replace(chr(92), '/')}"
+        clean_path = reel_path.replace("outputs/", "").replace("\\", "/")
+        video_url = f"http://localhost:8000/outputs/{clean_path}"
         logger.info(f"[IG SERVICE] Posting to IG - Video: {video_url}")
         logger.info(f"[IG SERVICE] Caption: {caption[:50]}...")
 
