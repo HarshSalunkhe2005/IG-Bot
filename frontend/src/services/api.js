@@ -35,3 +35,26 @@ export const buildReel = async (image_path, quote, vibe, font, animation) => {
   );
   return res.data;
 };
+
+export const postToInstagram = async (reel_path, caption) => {
+  const res = await axios.post(
+    `${BASE_URL}/post-to-instagram`,
+    { reel_path, caption },
+    { timeout: 120000 } // 2 min for IG upload
+  );
+  return res.data;
+};
+
+export const retryFailedPost = async (reel_path, caption) => {
+  const res = await axios.post(
+    `${BASE_URL}/retry-failed-post`,
+    { reel_path, caption },
+    { timeout: 120000 }
+  );
+  return res.data;
+};
+
+export const getFailedPosts = async () => {
+  const res = await axios.get(`${BASE_URL}/failed-posts`);
+  return res.data;
+};
