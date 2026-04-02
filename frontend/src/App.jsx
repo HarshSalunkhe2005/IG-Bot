@@ -2,23 +2,24 @@ import { useState } from "react";
 import VibePicker from "./components/VibePicker";
 import QuoteSelector from "./components/QuoteSelector";
 import FontPicker from "./components/FontPicker";
+import AnimationPicker from "./components/AnimationPicker";
 import PostPreview from "./components/PostPreview";
 import ReelPreview from "./components/ReelPreview";
 import CaptionReview from "./components/CaptionReview";
 
-const STEPS = ["vibe", "quote", "font", "post", "reel", "done"];
+const STEPS = ["vibe", "quote", "font", "animation", "post", "reel", "done"];
 
 export default function App() {
   const [step, setStep] = useState("vibe");
   const [vibe, setVibe] = useState(null);
   const [quoteData, setQuoteData] = useState(null);
   const [font, setFont] = useState(null);
+  const [animation, setAnimation] = useState("line_fade");
   const [postData, setPostData] = useState(null);
   const [reelData, setReelData] = useState(null);
 
   return (
     <div style={styles.app}>
-      {/* Step indicator */}
       <div style={styles.steps}>
         {STEPS.map((s, i) => (
           <div
@@ -32,21 +33,13 @@ export default function App() {
       </div>
 
       {step === "vibe" && (
-        <VibePicker
-          onSelect={(v) => {
-            setVibe(v);
-            setStep("quote");
-          }}
-        />
+        <VibePicker onSelect={(v) => { setVibe(v); setStep("quote"); }} />
       )}
 
       {step === "quote" && (
         <QuoteSelector
           vibe={vibe}
-          onSelect={(data) => {
-            setQuoteData(data);
-            setStep("font");
-          }}
+          onSelect={(data) => { setQuoteData(data); setStep("font"); }}
         />
       )}
 
@@ -54,10 +47,15 @@ export default function App() {
         <FontPicker
           quote={quoteData.quote}
           defaultFont={quoteData.font}
-          onConfirm={(selectedFont) => {
-            setFont(selectedFont);
-            setStep("post");
-          }}
+          onConfirm={(selectedFont) => { setFont(selectedFont); setStep("animation"); }}
+        />
+      )}
+
+      {step === "animation" && (
+        <AnimationPicker
+          quote={quoteData.quote}
+          font={font}
+          onConfirm={(selectedAnimation) => { setAnimation(selectedAnimation); setStep("post"); }}
         />
       )}
 
@@ -66,11 +64,8 @@ export default function App() {
           quote={quoteData.quote}
           vibe={vibe}
           font={font}
-          onApprove={(data) => {
-            setPostData(data);
-            setStep("reel");
-          }}
-          onRegenerate={() => setStep("font")}
+          onApprove={(data) => { setPostData(data); setStep("reel"); }}
+          onRegenerate={() => setStep("animation")}
         />
       )}
 
@@ -80,11 +75,9 @@ export default function App() {
           quote={quoteData.quote}
           vibe={vibe}
           font={font}
-          onApprove={(data) => {
-            setReelData(data);
-            setStep("done");
-          }}
-          onRegenerate={() => setStep("post")}
+          animation={animation}
+          onApprove={(data) => { setReelData(data); setStep("done"); }}
+          onRegenerate={() => setStep("animation")}
         />
       )}
 

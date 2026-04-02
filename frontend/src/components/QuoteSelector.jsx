@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { draftQuotes } from "../services/api";
 
 export default function QuoteSelector({ vibe, onSelect }) {
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [custom, setCustom] = useState("");
-  const [useCustom, setUseCustom] = useState(false);
+  const hasFetched = useRef(false);
 
   const fetchQuotes = async () => {
     setLoading(true);
     try {
       const results = await draftQuotes(vibe);
-      setQuotes(results);
+      setQuotes(results.filter(q => q.quote)); // filter out any failed ones
     } catch (e) {
       console.error(e);
     }
@@ -19,6 +19,8 @@ export default function QuoteSelector({ vibe, onSelect }) {
   };
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     fetchQuotes();
   }, []);
 
@@ -38,20 +40,19 @@ export default function QuoteSelector({ vibe, onSelect }) {
       <h2 style={styles.title}>Pick your quote</h2>
 
       {loading ? (
-        <p style={styles.loading}>Generating quotes...</p>
+        <p style={styles.loading}>✨ Generating quotes... this may take a moment</p>
       ) : (
         <div style={styles.list}>
+          {quotes.length === 0 && (
+            <p style={styles.empty}>No quotes generated. Try refreshing.</p>
+          )}
           {quotes.map((q, i) => (
             <button
               key={i}
               style={styles.quoteCard}
               onClick={() => handleSelect(q.quote, q.font)}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.borderColor = "#fff")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.borderColor = "#333")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#fff")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#333")}
             >
               <p style={styles.quoteText}>{q.quote}</p>
               <span style={styles.fontTag}>Font: {q.font}</span>
@@ -87,100 +88,18 @@ export default function QuoteSelector({ vibe, onSelect }) {
 }
 
 const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: "40px 20px",
-    maxWidth: "800px",
-    margin: "0 auto",
-  },
-  vibe: {
-    color: "#666",
-    fontSize: "13px",
-    textTransform: "uppercase",
-    letterSpacing: "3px",
-    marginBottom: "8px",
-  },
-  title: {
-    color: "#fff",
-    fontSize: "32px",
-    marginBottom: "32px",
-  },
-  loading: {
-    color: "#666",
-    fontSize: "16px",
-    margin: "40px 0",
-  },
-  list: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-    width: "100%",
-  },
-  quoteCard: {
-    background: "#111",
-    border: "1px solid #333",
-    borderRadius: "12px",
-    padding: "24px",
-    cursor: "pointer",
-    textAlign: "left",
-    transition: "border-color 0.2s",
-  },
-  quoteText: {
-    color: "#fff",
-    fontSize: "18px",
-    lineHeight: "1.6",
-    marginBottom: "8px",
-  },
-  fontTag: {
-    color: "#555",
-    fontSize: "12px",
-  },
-  refreshBtn: {
-    marginTop: "24px",
-    background: "transparent",
-    border: "1px solid #444",
-    borderRadius: "8px",
-    color: "#aaa",
-    padding: "10px 24px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-  divider: {
-    width: "100%",
-    textAlign: "center",
-    margin: "32px 0 16px",
-    borderTop: "1px solid #333",
-    paddingTop: "16px",
-  },
-  dividerText: {
-    color: "#555",
-    fontSize: "13px",
-    textTransform: "uppercase",
-    letterSpacing: "2px",
-  },
-  textarea: {
-    width: "100%",
-    background: "#111",
-    border: "1px solid #333",
-    borderRadius: "12px",
-    color: "#fff",
-    padding: "16px",
-    fontSize: "16px",
-    resize: "vertical",
-    outline: "none",
-    boxSizing: "border-box",
-  },
-  customBtn: {
-    marginTop: "12px",
-    background: "#fff",
-    color: "#000",
-    border: "none",
-    borderRadius: "8px",
-    padding: "12px 32px",
-    fontSize: "15px",
-    cursor: "pointer",
-    fontWeight: "600",
-  },
+  container: { display: "flex", flexDirection: "column", alignItems: "center", padding: "40px 20px", maxWidth: "800px", margin: "0 auto" },
+  vibe: { color: "#666", fontSize: "13px", textTransform: "uppercase", letterSpacing: "3px", marginBottom: "8px" },
+  title: { color: "#fff", fontSize: "32px", marginBottom: "32px" },
+  loading: { color: "#666", fontSize: "16px", margin: "40px 0", textAlign: "center" },
+  empty: { color: "#555", fontSize: "15px", textAlign: "center", padding: "20px" },
+  list: { display: "flex", flexDirection: "column", gap: "12px", width: "100%" },
+  quoteCard: { background: "#111", border: "1px solid #333", borderRadius: "12px", padding: "24px", cursor: "pointer", textAlign: "left", transition: "border-color 0.2s" },
+  quoteText: { color: "#fff", fontSize: "18px", lineHeight: "1.6", marginBottom: "8px" },
+  fontTag: { color: "#555", fontSize: "12px" },
+  refreshBtn: { marginTop: "24px", background: "transparent", border: "1px solid #444", borderRadius: "8px", color: "#aaa", padding: "10px 24px", cursor: "pointer", fontSize: "14px" },
+  divider: { width: "100%", textAlign: "center", margin: "32px 0 16px", borderTop: "1px solid #333", paddingTop: "16px" },
+  dividerText: { color: "#555", fontSize: "13px", textTransform: "uppercase", letterSpacing: "2px" },
+  textarea: { width: "100%", background: "#111", border: "1px solid #333", borderRadius: "12px", color: "#fff", padding: "16px", fontSize: "16px", resize: "vertical", outline: "none", boxSizing: "border-box" },
+  customBtn: { marginTop: "12px", background: "#fff", color: "#000", border: "none", borderRadius: "8px", padding: "12px 32px", fontSize: "15px", cursor: "pointer", fontWeight: "600" },
 };

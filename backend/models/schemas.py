@@ -12,3 +12,4 @@ class ReelRequest(BaseModel):
     quote: str
     vibe: str = "melancholic"
     font: Optional[str] = None
+    animation: str = "line_fade"
