@@ -12,4 +12,11 @@ class ReelRequest(BaseModel):
     quote: str
     vibe: str = "melancholic"
     font: Optional[str] = None
-    animation: str = "line_fade"
+
+class PostToInstagramRequest(BaseModel):
+    reel_path: str
+    caption: str
+
+class RetryFailedPostRequest(BaseModel):
+    reel_path: str
+    caption: str
