@@ -1,6 +1,4 @@
 .env
-file_hierarchy.txt
-run_bot.py
 outputs/
 __pycache__/
 *.pyc
