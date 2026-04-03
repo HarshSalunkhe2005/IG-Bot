@@ -11,7 +11,7 @@ const VIBE_DESCRIPTIONS = {
 export default function VibePicker({ onSelect }) {
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Moodle Bot</h1>
+      <h1 style={styles.title}>YT-Bot</h1>
       <p style={styles.subtitle}>Choose your vibe</p>
       <div style={styles.grid}>
         {VIBES.map((vibe) => (
