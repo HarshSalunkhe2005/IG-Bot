@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { buildReel } from "../services/api";
+import { buildShort } from "../services/api";
 
 export default function ReelPreview({ postData, quote, vibe, font, animation, onApprove, onRegenerate }) {
   const [loading, setLoading] = useState(true);
@@ -11,10 +11,10 @@ export default function ReelPreview({ postData, quote, vibe, font, animation, on
     setLoading(true);
     setError(null);
     try {
-      const result = await buildReel(postData.clean_bg_path, quote, vibe, font, animation);
+      const result = await buildShort(postData.clean_bg_path, quote, vibe, font, animation);
       setData(result);
     } catch (e) {
-      setError("Failed to generate reel. Try again.");
+      setError("Failed to generate short. Try again.");
     }
     setLoading(false);
   };
@@ -36,8 +36,8 @@ export default function ReelPreview({ postData, quote, vibe, font, animation, on
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Your Reel</h2>
-      {loading && <p style={styles.loading}>⌛ Building your reel... ~30 seconds</p>}
+      <h2 style={styles.title}>Your Short</h2>
+      {loading && <p style={styles.loading}>⌛ Building your short... ~30 seconds</p>}
       {error && (
         <>
           <p style={styles.error}>{error}</p>
@@ -57,7 +57,7 @@ export default function ReelPreview({ postData, quote, vibe, font, animation, on
           <div style={styles.caption}>
             <p style={styles.captionLabel}>CAPTION</p>
             {isErrorCaption(data.caption) ? (
-              <p style={styles.captionFallback}>
+            <p style={styles.captionFallback}>
                 Caption generation hit a rate limit. Check the .txt file in outputs/reels/ or retry.
               </p>
             ) : (

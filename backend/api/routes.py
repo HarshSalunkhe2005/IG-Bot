@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException
-from backend.models.schemas import PostRequest, ReelRequest, PostToInstagramRequest, RetryFailedPostRequest
+from backend.models.schemas import PostRequest, ShortRequest, PostToYoutubeRequest, RetryFailedPostRequest
 from backend.core.engine import generate_quote
 from backend.core.visualizer import create_styled_post
 from backend.core.image_service import generate_background_image
 from backend.core.reel.reel_builder import build_reel
-from backend.core.ig_service import post_reel_to_instagram, load_failed_posts, remove_failed_post, increment_retry_count
+from backend.core.youtube_service import post_short_to_youtube, load_failed_posts, remove_failed_post, increment_retry_count
 
 router = APIRouter()
 
@@ -45,8 +45,8 @@ async def render_post(request: PostRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/reel")
-async def render_reel(request: ReelRequest):
+@router.post("/short")
+async def render_short(request: ShortRequest):
     try:
         result = await build_reel(
             image_path=request.image_path,
@@ -55,7 +55,7 @@ async def render_reel(request: ReelRequest):
             font_name=request.font
         )
         return {
-            "message": "Reel built successfully",
+            "message": "Short built successfully",
             "reel_path": result["reel_path"],
             "caption_path": result["caption_path"],
             "caption": result["caption"]
@@ -63,11 +63,11 @@ async def render_reel(request: ReelRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/post-to-instagram")
-async def post_to_instagram(request: PostToInstagramRequest):
-    """Post reel to Instagram"""
-    result = await post_reel_to_instagram(request.reel_path, request.caption)
-    
+@router.post("/post-to-youtube")
+async def post_to_youtube(request: PostToYoutubeRequest):
+    """Post short to YouTube"""
+    result = await post_short_to_youtube(request.reel_path, request.caption)
+
     if not result.get("success"):
         raise HTTPException(
             status_code=500,
@@ -76,7 +76,7 @@ async def post_to_instagram(request: PostToInstagramRequest):
                 "suggestion": result.get("suggestion")
             }
         )
-    
+
     return {
         "success": True,
         "post_url": result.get("post_url"),
@@ -86,17 +86,17 @@ async def post_to_instagram(request: PostToInstagramRequest):
 
 @router.post("/retry-failed-post")
 async def retry_failed_post(request: RetryFailedPostRequest):
-    """Retry posting a failed reel"""
+    """Retry posting a failed short"""
     increment_retry_count(request.reel_path)
-    result = await post_reel_to_instagram(request.reel_path, request.caption)
-    
+    result = await post_short_to_youtube(request.reel_path, request.caption)
+
     if result.get("success"):
         remove_failed_post(request.reel_path)
         return {
             "success": True,
             "post_url": result.get("post_url"),
             "post_id": result.get("post_id"),
-            "message": "Reel posted successfully on retry!"
+            "message": "Short posted successfully on retry!"
         }
     else:
         raise HTTPException(
