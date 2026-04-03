@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { postToInstagram, retryFailedPost } from "../services/api";
+import { postToYoutube, retryFailedPost } from "../services/api";
 
 export default function CaptionReview({ reelData }) {
   const [posting, setPosting] = useState(false);
@@ -8,17 +8,17 @@ export default function CaptionReview({ reelData }) {
   const [error, setError] = useState(null);
   const [suggestion, setSuggestion] = useState(null);
 
-  const handlePostToInstagram = async () => {
+  const handlePostToYoutube = async () => {
     setPosting(true);
     setError(null);
     setSuggestion(null);
     try {
-      const result = await postToInstagram(reelData.reel_path, reelData.caption);
+      const result = await postToYoutube(reelData.reel_path, reelData.caption);
       setPostUrl(result.post_url);
       setPosted(true);
     } catch (e) {
       const errorDetail = e.response?.data?.detail;
-      setError(errorDetail?.error || "Failed to post to Instagram");
+      setError(errorDetail?.error || "Failed to post to YouTube");
       setSuggestion(errorDetail?.suggestion || "Please try again later");
     } finally {
       setPosting(false);
@@ -50,8 +50,8 @@ export default function CaptionReview({ reelData }) {
     return (
       <div style={styles.container}>
         <div style={styles.checkmark}>✓</div>
-        <h2 style={styles.title}>Posted to Instagram!</h2>
-        <p style={styles.subtitle}>Your reel is now live</p>
+        <h2 style={styles.title}>Posted to YouTube!</h2>
+        <p style={styles.subtitle}>Your Short is now live</p>
 
         <div style={styles.card}>
           <p style={styles.label}>POST URL</p>
@@ -102,8 +102,8 @@ export default function CaptionReview({ reelData }) {
   return (
     <div style={styles.container}>
       <div style={styles.checkmark}>✓</div>
-      <h2 style={styles.title}>Pipeline Complete</h2>
-      <p style={styles.subtitle}>Your reel is ready to post</p>
+      <h2 style={styles.title}>Your Short is ready to post</h2>
+      <p style={styles.subtitle}>Review caption and video before posting</p>
 
       <div style={styles.card}>
         <p style={styles.label}>CAPTION</p>
@@ -119,10 +119,10 @@ export default function CaptionReview({ reelData }) {
       <div style={styles.actions}>
         <button
           style={styles.postBtn}
-          onClick={handlePostToInstagram}
+          onClick={handlePostToYoutube}
           disabled={posting}
         >
-          {posting ? "⏳ Posting..." : "📤 Post to Instagram Now"}
+          {posting ? "⏳ Posting..." : "📤 Post to YouTube Now"}
         </button>
         <button style={styles.backBtn} onClick={handleNavigateBack}>
           ← Back
