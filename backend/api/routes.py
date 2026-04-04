@@ -12,9 +12,9 @@ async def draft_quote(request: PostRequest):
     if isinstance(result, tuple):
         quote, font, caption = result
     else:
-        raise HTTPException(status_code=500, detail=result)
+        raise HTTPException(status_code=500, detail="Quote generation failed. Check server logs.")
     if "Error" in quote:
-        raise HTTPException(status_code=500, detail=quote)
+        raise HTTPException(status_code=500, detail="Quote generation failed. Check server logs.")
     return {"quote": quote, "font": font, "caption": caption, "vibe": request.vibe}
 
 @router.post("/short")
