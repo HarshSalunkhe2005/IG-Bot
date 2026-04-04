@@ -24,13 +24,13 @@ export default function QuoteSelector({ vibe, onSelect }) {
     fetchQuotes();
   }, []);
 
-  const handleSelect = (quote, font) => {
-    onSelect({ quote, font });
+  const handleSelect = (quote, font, caption) => {
+    onSelect({ quote, font, caption: caption || "Reflections" });
   };
 
   const handleCustomSubmit = () => {
     if (custom.trim()) {
-      onSelect({ quote: custom.trim(), font: "Playfair Display" });
+      onSelect({ quote: custom.trim(), font: "Playfair Display", caption: "Reflections" });
     }
   };
 
@@ -50,7 +50,7 @@ export default function QuoteSelector({ vibe, onSelect }) {
             <button
               key={i}
               style={styles.quoteCard}
-              onClick={() => handleSelect(q.quote, q.font)}
+              onClick={() => handleSelect(q.quote, q.font, q.caption)}
               onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#fff")}
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#333")}
             >
