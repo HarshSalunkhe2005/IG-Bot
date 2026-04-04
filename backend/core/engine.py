@@ -32,7 +32,7 @@ async def generate_quote(vibe: str = "melancholic"):
     font_hint = VIBE_FONT_HINTS.get(vibe, "an elegant serif font")
 
     prompt = (
-        f"You are a creative director for a premium Instagram page. "
+        f"You are a creative director for a premium YouTube Shorts channel. "
         f"Generate a deep, {vibe} quote in English. "
         f"Also suggest ONE perfect Google Font name that matches the vibe. "
         f"For this vibe, prefer {font_hint}. "

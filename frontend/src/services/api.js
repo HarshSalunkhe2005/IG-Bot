@@ -27,20 +27,20 @@ export const renderPost = async (text, vibe, font) => {
   return res.data;
 };
 
-export const buildReel = async (image_path, quote, vibe, font, animation) => {
+export const buildShort = async (image_path, quote, vibe, font, animation) => {
   const res = await axios.post(
-    `${BASE_URL}/reel`,
+    `${BASE_URL}/short`,
     { image_path, quote, vibe, font, animation },
-    { timeout: 300000 } // 5 min — reel + caption retry can take time
+    { timeout: 300000 } // 5 min — short + caption retry can take time
   );
   return res.data;
 };
 
-export const postToInstagram = async (reel_path, caption) => {
+export const postToYoutube = async (reel_path, caption) => {
   const res = await axios.post(
-    `${BASE_URL}/post-to-instagram`,
+    `${BASE_URL}/post-to-youtube`,
     { reel_path, caption },
-    { timeout: 120000 } // 2 min for IG upload
+    { timeout: 120000 } // 2 min for YT upload
   );
   return res.data;
 };

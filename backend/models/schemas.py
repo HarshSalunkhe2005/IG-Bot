@@ -7,13 +7,13 @@ class PostRequest(BaseModel):
     bg_type: str = "ai_generated"
     font: Optional[str] = None
 
-class ReelRequest(BaseModel):
+class ShortRequest(BaseModel):
     image_path: str
     quote: str
     vibe: str = "melancholic"
     font: Optional[str] = None
 
-class PostToInstagramRequest(BaseModel):
+class PostToYoutubeRequest(BaseModel):
     reel_path: str
     caption: str
 

@@ -10,10 +10,10 @@ URL = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:gen
 
 async def generate_caption(quote: str, vibe: str = "melancholic", retries: int = 3) -> str:
     prompt = (
-        f"You are an Instagram content strategist for a premium quote page. "
+        f"You are a YouTube Shorts content strategist for a premium quote channel. "
         f"Given this quote: '{quote}' and vibe: '{vibe}', "
-        f"write a short punchy Instagram caption (1-2 sentences max) "
-        f"and add 5-7 relevant trending hashtags at the end. "
+        f"write a short punchy YouTube Shorts caption (1-2 sentences max) "
+        f"and add 5-7 relevant trending hashtags at the end including #Shorts. "
         f"No extra explanation, just the caption and hashtags."
     )
 
