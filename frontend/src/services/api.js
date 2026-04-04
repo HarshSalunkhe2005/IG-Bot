@@ -18,19 +18,10 @@ export const draftQuotes = async (vibe) => {
   return results;
 };
 
-export const renderPost = async (text, vibe, font) => {
-  const res = await axios.post(
-    `${BASE_URL}/render`,
-    { text, vibe, bg_type: "ai_generated", font },
-    { timeout: 120000 }
-  );
-  return res.data;
-};
-
-export const buildShort = async (image_path, quote, vibe, font, animation) => {
+export const buildShort = async (quote, vibe, font, animation, caption) => {
   const res = await axios.post(
     `${BASE_URL}/short`,
-    { image_path, quote, vibe, font, animation },
+    { quote, vibe, font, animation, caption },
     { timeout: 300000 } // 5 min — short + caption retry can take time
   );
   return res.data;

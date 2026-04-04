@@ -1,8 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from backend.models.schemas import PostRequest, ShortRequest, PostToYoutubeRequest, RetryFailedPostRequest
 from backend.core.engine import generate_quote
-from backend.core.visualizer import create_styled_post
-from backend.core.image_service import generate_background_image
 from backend.core.reel.reel_builder import build_reel
 from backend.core.youtube_service import post_short_to_youtube, load_failed_posts, remove_failed_post, increment_retry_count
 
@@ -12,47 +10,22 @@ router = APIRouter()
 async def draft_quote(request: PostRequest):
     result = await generate_quote(request.vibe)
     if isinstance(result, tuple):
-        quote, font = result
+        quote, font, caption = result
     else:
         raise HTTPException(status_code=500, detail=result)
     if "Error" in quote:
         raise HTTPException(status_code=500, detail=quote)
-    return {"quote": quote, "font": font, "vibe": request.vibe}
-
-@router.post("/render")
-async def render_post(request: PostRequest):
-    if not request.text:
-        raise HTTPException(status_code=400, detail="Text is required for rendering.")
-    try:
-        ai_bg_path = None
-        if request.bg_type == "ai_generated":
-            ai_bg_path = await generate_background_image(
-                quote_text=request.text, vibe=request.vibe
-            )
-            if not ai_bg_path:
-                print("--- [ROUTE] AI Background generation failed. Falling back. ---")
-
-        post_path, clean_bg_path = create_styled_post(
-            text=request.text, vibe=request.vibe,
-            ai_bg_path=ai_bg_path, font_name=request.font
-        )
-        return {
-            "message": "Post rendered successfully",
-            "path": post_path,
-            "clean_bg_path": clean_bg_path,
-            "font": request.font
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return {"quote": quote, "font": font, "caption": caption, "vibe": request.vibe}
 
 @router.post("/short")
 async def render_short(request: ShortRequest):
     try:
         result = await build_reel(
-            image_path=request.image_path,
             quote=request.quote,
             vibe=request.vibe,
-            font_name=request.font
+            font_name=request.font,
+            animation=request.animation,
+            short_caption=request.caption,
         )
         return {
             "message": "Short built successfully",

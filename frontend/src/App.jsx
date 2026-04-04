@@ -3,11 +3,10 @@ import VibePicker from "./components/VibePicker";
 import QuoteSelector from "./components/QuoteSelector";
 import FontPicker from "./components/FontPicker";
 import AnimationPicker from "./components/AnimationPicker";
-import PostPreview from "./components/PostPreview";
 import ReelPreview from "./components/ReelPreview";
 import CaptionReview from "./components/CaptionReview";
 
-const STEPS = ["vibe", "quote", "font", "animation", "post", "reel", "done"];
+const STEPS = ["vibe", "quote", "font", "animation", "reel", "done"];
 
 export default function App() {
   const [step, setStep] = useState("vibe");
@@ -15,7 +14,6 @@ export default function App() {
   const [quoteData, setQuoteData] = useState(null);
   const [font, setFont] = useState(null);
   const [animation, setAnimation] = useState("line_fade");
-  const [postData, setPostData] = useState(null);
   const [reelData, setReelData] = useState(null);
 
   return (
@@ -55,27 +53,17 @@ export default function App() {
         <AnimationPicker
           quote={quoteData.quote}
           font={font}
-          onConfirm={(selectedAnimation) => { setAnimation(selectedAnimation); setStep("post"); }}
-        />
-      )}
-
-      {step === "post" && (
-        <PostPreview
-          quote={quoteData.quote}
-          vibe={vibe}
-          font={font}
-          onApprove={(data) => { setPostData(data); setStep("reel"); }}
-          onRegenerate={() => setStep("animation")}
+          onConfirm={(selectedAnimation) => { setAnimation(selectedAnimation); setStep("reel"); }}
         />
       )}
 
       {step === "reel" && (
         <ReelPreview
-          postData={postData}
           quote={quoteData.quote}
           vibe={vibe}
           font={font}
           animation={animation}
+          caption={quoteData.caption}
           onApprove={(data) => { setReelData(data); setStep("done"); }}
           onRegenerate={() => setStep("animation")}
         />

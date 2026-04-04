@@ -8,10 +8,11 @@ class PostRequest(BaseModel):
     font: Optional[str] = None
 
 class ShortRequest(BaseModel):
-    image_path: str
     quote: str
     vibe: str = "melancholic"
     font: Optional[str] = None
+    animation: str = "line_fade"
+    caption: str = "Reflections"
 
 class PostToYoutubeRequest(BaseModel):
     reel_path: str

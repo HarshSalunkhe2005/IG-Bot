@@ -36,9 +36,11 @@ async def generate_quote(vibe: str = "melancholic"):
         f"Generate a deep, {vibe} quote in English. "
         f"Also suggest ONE perfect Google Font name that matches the vibe. "
         f"For this vibe, prefer {font_hint}. "
+        f"Also provide ONE short caption (1-3 words max) that captures the essence of the quote "
+        f"(e.g., 'Transformation', 'Growth', 'Becoming', 'Inner Silence'). "
         f"Ensure the quote is NOT one of these: {used_quotes[-10:] if used_quotes else 'None'}. "
         "Respond ONLY in this exact JSON format, no extra text, no markdown: "
-        '{"quote": "your quote here", "font": "Google Font Name"}'
+        '{"quote": "your quote here", "font": "Google Font Name", "caption": "OneWord"}'
     )
 
     payload = {"contents": [{"parts": [{"text": prompt}]}]}
@@ -54,12 +56,13 @@ async def generate_quote(vibe: str = "melancholic"):
                 parsed = json.loads(raw)
                 quote = parsed.get("quote", "").strip()
                 font = parsed.get("font", "Playfair Display").strip()
+                caption = parsed.get("caption", "Reflections").strip()
 
                 if quote in used_quotes:
                     return await generate_quote(vibe)
 
-                return quote, font
+                return quote, font, caption
 
-            return f"Error: API returned {response.status_code}", None
+            return f"Error: API returned {response.status_code}", None, None
         except Exception as e:
-            return f"Error: {str(e)}", None
+            return f"Error: {str(e)}", None, None
